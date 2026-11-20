@@ -16,7 +16,7 @@ const TILE_PRESETS = {
   RESOURCE_COMMON: {
     buildable: false,
     passable: true,
-    cost: 45,
+    cost: 22,
     points: 1,
     defense_modifier: 0.8, 
     attack_modifier: 1.0   
@@ -407,7 +407,7 @@ const TILES = {
         src: './img/special/grass/Enchanted_Windmill.png',
         buildable: false,
         passable: true,
-        cost: 20,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -418,7 +418,7 @@ const TILES = {
         src: './img/special/grass/Boneyard.png',
         buildable: false,
         passable: true,
-        cost: 20,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -429,7 +429,7 @@ const TILES = {
         src: './img/special/grass/Mysterious_Shrine.png',
         buildable: false,
         passable: true,
-        cost: 45,
+        cost: 22,
         points: 35,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -454,7 +454,7 @@ const TILES = {
         src: './img/special/sand/Dragon_Skull.png',
         buildable: false,
         passable: true,
-        cost: 26,
+        cost: 22,
         points: 5,
         defense_modifier: 0.5,
         attack_modifier: 0.8
@@ -468,7 +468,7 @@ const TILES = {
         src: './img/special/halloween/Pal_Sematary.png',
         buildable: false,
         passable: true,
-        cost: 38,
+        cost: 22,
         points: 2,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -479,7 +479,7 @@ const TILES = {
         src: './img/special/halloween/Haunted_Windmill.png',
         buildable: false,
         passable: true,
-        cost: 25,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -490,7 +490,7 @@ const TILES = {
         src: './img/special/halloween/Fields_of_Misery.png',
         buildable: false,
         passable: true,
-        cost: 45,
+        cost: 22,
         points: 20,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -501,7 +501,7 @@ const TILES = {
         src: './img/special/winter/Manfred.png',
         buildable: false,
         passable: true,
-        cost: 20,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.00
@@ -515,7 +515,7 @@ const TILES = {
         src: './img/special/easter/Imposing_Structure.png',
         buildable: false,
         passable: true,
-        cost: 26,
+        cost: 22,
         points: 5,
         defense_modifier: 0.10,
         attack_modifier: 0.9
@@ -526,7 +526,7 @@ const TILES = {
         src: './img/special/easter/Miracle_Shrine.png',
         buildable: false,
         passable: true,
-        cost: 36,
+        cost: 22,
         points: 20,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -540,7 +540,7 @@ const TILES = {
         src: './img/special/winter/Wintery_Mill.png',
         buildable: false,
         passable: true,
-        cost: 10,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.00
@@ -551,7 +551,7 @@ const TILES = {
         src: './img/special/winter/Manfred.png',
         buildable: false,
         passable: true,
-        cost: 20,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.00
@@ -562,7 +562,7 @@ const TILES = {
         src: './img/special/winter/Frostbitten_Ruins.png',
         buildable: false,
         passable: true,
-        cost: 33,
+        cost: 22,
         points: 10,
         defense_modifier: 0.9,
         attack_modifier: 1.10
@@ -573,7 +573,7 @@ const TILES = {
         src: './img/special/winter/Festive_Tree.png',
         buildable: false,
         passable: true,
-        cost: 36,
+        cost: 22,
         points: 35,
         defense_modifier: 1.3,
         attack_modifier: 0.7
