@@ -9,20 +9,8 @@
  * hex_map.js does the wiring (clicks, overview panel, saving).
  */
 const Conquest = (() => {
-  // ==========================================================================
-  //  SETTINGS YOU MAY WANT TO TWEAK
-  // ==========================================================================
-
-  // How many hexes out a watchtower claims, by level (index = level).
-  // Level 0 claims only the hex it stands on. The other numbers are my
-  // placeholders: change them here to match the real game.
   const TOWER_RADIUS = [0, 1, 2, 3, 4];
-
-  // A move covers this many tiles (the Energy tab can override it).
   const TILES_PER_MOVE = 4;
-
-  // The first tile each team can take from its stronghold: the corner hex
-  // on its side of the map. Change these if the game uses different tiles.
   const STRONGHOLD_ENTRY = { yellow: 'A1', green: 'AS1', blue: 'A45', red: 'AS45' };
 
   const MAX_NOTE = 80;
@@ -33,22 +21,14 @@ const Conquest = (() => {
     green:  { label: 'Green',  color: '#3fbf4a', corner: 'ne', cornerLabel: 'North East' },
     blue:   { label: 'Blue',   color: '#2f6bff', corner: 'sw', cornerLabel: 'South West' }
   };
-
-  // Teams in map order: north-west, north-east, south-west, south-east.
   const CORNER_ORDER = ['yellow', 'green', 'blue', 'red'];
-
-  // Energy rules. Moving inside your own alliance's territory costs half,
-  // inside an enemy's territory double. Your techs then reduce the result.
   const OWN_TERRITORY_MULT = 0.5;
   const ENEMY_TERRITORY_MULT = 2;
 
-  // ==========================================================================
-
   const TEAM_KEYS = Object.keys(TEAMS);
   const MAX_LEVEL = TOWER_RADIUS.length - 1;
-  const STRONGHOLD = 'SH'; // path start meaning "from my alliance's stronghold"
+  const STRONGHOLD = 'SH';
 
-  // ---- cell ids (same scheme as the map: A1, B12, AS46 ...) ----------------
   const fromAlpha = (s) => s.split('').reduce((r, a) => r * 26 + parseInt(a, 36) - 9, 0) - 1;
 
   const toAlpha = (n) => {
@@ -67,7 +47,6 @@ const Conquest = (() => {
 
   const cellId = (col, row) => toAlpha(col) + row;
 
-  // What a person types for a position: "d32", " D 32 ", "sh", "stronghold".
   const normalizePosition = (str) => {
     const s = String(str || '').toUpperCase().replace(/\s+/g, '');
     if (!s) return null;
@@ -77,9 +56,6 @@ const Conquest = (() => {
 
   const cleanNote = (str) => String(str || '').replace(/\s+/g, ' ').trim().slice(0, MAX_NOTE);
 
-  // ---- hex geometry --------------------------------------------------------
-  // The map has flat-topped hexes; even columns (A, C, E ...) sit half a hex
-  // lower than odd columns. Each hex is drawn in a 120 x 104 box.
   const HEX_W = 120;
   const HEX_H = 104;
 
@@ -90,28 +66,19 @@ const Conquest = (() => {
   };
 
   const hexDistance = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y), Math.abs(a.z - b.z));
-
-  // Neighbour offsets [dcol, drow] for the six sides, in this order:
-  // top, upper-right, lower-right, bottom, lower-left, upper-left.
   const neighborOffsets = (col) => (col % 2 === 0
     ? [[0, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]]
     : [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 0], [-1, -1]]);
 
-  // Corner points of the hex box, in the same side order as above.
   const CORNERS = [[30, 0], [90, 0], [120, 52], [90, 104], [30, 104], [0, 52]];
 
-  // How the route is drawn.
   const PATH_COLOR = '#ff2bd6';
   const PATH_EDGE = '#0b0f1e';
 
-  // Middle of each side, same order; used to draw a path from hex to hex.
   const SIDE_MID = [[60, 0], [105, 26], [105, 78], [60, 104], [15, 78], [15, 26]];
 
   const radiusFor = (level) => TOWER_RADIUS[Math.min(Math.max(Math.round(Number(level)) || 0, 0), MAX_LEVEL)];
 
-  // Which cell each tower claims. Where towers overlap, the HIGHEST LEVEL wins
-  // and, at equal level, the tower BUILT FIRST (lowest id). A tower's own hex
-  // always stays with its owner, even if a stronger tower covers it.
   const computeTerritory = (towers, inBounds) => {
     const best = new Map();
 
@@ -148,12 +115,7 @@ const Conquest = (() => {
     return best;
   };
 
-  // ---- energy -------------------------------------------------------------
   const pct = (v) => Math.min(Math.max(Number(v) || 0, 0), 100) / 100;
-
-  // Energy to step onto a tile, always a whole number (rounded to nearest). `owner` is the team whose territory it is
-  // (or null), `myTeam` is the team you play as ('' = not chosen), and
-  // `techs` = { general, alliance, enemy } in percent.
   const effectiveCost = (base, owner, myTeam, techs) => {
     let cost = base * (1 - pct(techs.general));
     if (myTeam && owner) {
@@ -171,12 +133,7 @@ const Conquest = (() => {
     enemy: ENEMY_TERRITORY_MULT * (1 - pct(techs.general)) * (1 - pct(techs.enemy))
   });
 
-  // ---- path finding ---------------------------------------------------------
-  // Cheapest route in energy from one hex to another (Dijkstra). `costAt(col,
-  // row)` returns the energy to step onto that hex, or null if it can't be
-  // entered. Equal-energy routes prefer fewer moves. The start hex is free.
   const findPath = (start, goal, costAt, opts = {}) => {
-    // opts.entry: begin in the stronghold and enter this hex first (it costs energy).
     const s = parseCell(opts.entry || start);
     const g = parseCell(goal);
     if (!s || !g) return { ok: false, reason: 'Both tiles need a valid position.' };
@@ -271,7 +228,6 @@ const Conquest = (() => {
     return { ok: true, cells, costs, total: best.get(goalId).cost, fromStronghold: !!opts.entry };
   };
 
-  // Which side of hex `a` touches hex `b` (0 top ... 5 upper-left), or -1.
   const sideBetween = (a, b) => {
     const pa = parseCell(a);
     const pb = parseCell(b);
@@ -283,17 +239,14 @@ const Conquest = (() => {
     return -1;
   };
 
-  // Per-hex info for drawing a route. A route is cut into moves of
-  // `perMove` tiles; the last tile of each move gets its move number.
-  // `fromStronghold` means the first tile is entered too (it counts as a tile).
   const pathInfoMap = (cells, opts = {}) => {
     const perMove = Math.max(1, Math.round(opts.perMove) || TILES_PER_MOVE);
-    const skip = opts.fromStronghold ? 0 : 1; // the start hex isn't "entered" otherwise
+    const skip = opts.fromStronghold ? 0 : 1; 
     const total = cells.length - skip;
     const m = new Map();
 
     cells.forEach((c, i) => {
-      const step = i - skip + 1; // 1-based count of tiles entered
+      const step = i - skip + 1; 
       const endsMove = step >= 1 && (step % perMove === 0 || step === total);
       m.set(c, {
         index: i,
@@ -307,9 +260,6 @@ const Conquest = (() => {
     return m;
   };
 
-  // ---- saved data ----------------------------------------------------------
-  // Cleans a list of pieces (from storage or an import) into a safe shape.
-  // Only towers exist; anything else in an older save is dropped.
   const normalizePieces = (arr) => {
     const out = [];
     const usedIds = new Set();
@@ -344,10 +294,8 @@ const Conquest = (() => {
     return out;
   };
 
-  // ---- artwork -------------------------------------------------------------
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-  // amt > 0 lightens, amt < 0 darkens
   const shade = (hex, amt) => {
     const n = parseInt(hex.slice(1), 16);
     let r = n >> 16;
@@ -366,11 +314,6 @@ const Conquest = (() => {
 
   const arch = (x, y) =>
     `<path d="M${x} ${y + 8} L${x} ${y + 3} Q${x + 3} ${y - 1} ${x + 6} ${y + 3} L${x + 6} ${y + 8} Z" fill="#1d1d1d"/>`;
-
-  // A watchtower in a 60 x 100 box. Level changes the build, like the game:
-  // 1 = wooden, 2 = stone top with eyes on the roof, 3 = all stone with gold,
-  // 4 = same with extra gold spikes.
-  // Level 0: a small wooden outpost with a flag.
   const outpostInner = (team) => {
     const c = TEAMS[team].color;
     const cd = shade(c, -0.4);
@@ -419,7 +362,6 @@ const Conquest = (() => {
     g += arch(20, 41) + arch(34, 41);
     if (level >= 3) g += arch(20, 51) + arch(34, 51);
 
-    // roof
     g += `<path d="M4 45 Q22 42 26 28 L30 5 L34 28 Q38 42 56 45 Q44 51 30 51 Q16 51 4 45 Z" fill="${c}" stroke="${cd}" stroke-width="1.5" stroke-linejoin="round"/>`;
     g += `<path d="M30 7 L26 28 Q22 40 10 44 Q22 36 30 7 Z" fill="${cl}" opacity="0.5"/>`;
 
@@ -429,7 +371,6 @@ const Conquest = (() => {
       g += '<circle cx="21" cy="40" r="1.4" fill="#111"/><circle cx="39" cy="40" r="1.4" fill="#111"/>';
     }
 
-    // tip of the spire
     const tipFill = level >= 3 ? gold : silver;
     const tipStroke = level >= 3 ? goldD : '#7d93a3';
     g += `<path d="M30 0 L33.5 13 L26.5 13 Z" fill="${tipFill}" stroke="${tipStroke}" stroke-width="0.8" stroke-linejoin="round"/>`;
@@ -448,7 +389,6 @@ const Conquest = (() => {
     `<circle cx="${cx}" cy="${cy}" r="8" fill="#1d1d1d" stroke="#ffc928" stroke-width="1.6"/>` +
     `<text x="${cx}" y="${cy + 3.8}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#ffffff">${level}</text>`;
 
-  // The alliance stronghold: a walled town with red-roofed (team coloured) turrets.
   const strongholdSVG = (team, width = 72) => {
     const c = TEAMS[team].color;
     const cd = shade(c, -0.4);
@@ -476,7 +416,6 @@ const Conquest = (() => {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 70" width="${width}" height="${Math.round(width * 70 / 96)}">${g}</svg>`;
   };
 
-  // 3D renders from sprites.js (a global); everything falls back to the vector art if missing.
   const sprite = (key) => (typeof SPRITES !== 'undefined' && SPRITES[key]) || null;
 
   const spriteImg = (key, ax, ay, kk) => {
@@ -494,19 +433,11 @@ const Conquest = (() => {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 100" width="${Math.round(height * 0.6)}" height="${height}">${towerInner(team, level)}${levelBadge(level, 9, 70)}</svg>`;
   };
 
-  // ---- one hex's overlay ---------------------------------------------------
-  // The overlay is drawn in two layers so 3D pieces always sit above every
-  // territory tint:  base = territory fill, borders and the route line;
-  // top = towers, markers, costs and labels. Pieces may rise above the
-  // hex (like in the game), so the drawing area is larger than the hex.
   const OVERLAY_BOX = { x: -20, y: -60, w: 160, h: 170 };
 
-  // No positioning styles on the <svg>: the page places it with CSS (.hex-overlay svg), and the PNG
-  // export loads this very string as a standalone image, where such styles would shift the picture.
   const wrapSVG = (inner) =>
     `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${OVERLAY_BOX.x} ${OVERLAY_BOX.y} ${OVERLAY_BOX.w} ${OVERLAY_BOX.h}" width="${OVERLAY_BOX.w}" height="${OVERLAY_BOX.h}">${inner}</svg>`;
 
-  // Where a tower stands, in hex coordinates (its size comes from the sprite).
   const TOWER_SPOT = [60, 74];
 
   const overlayLayers = (cell, territory, here, opts = {}) => {
@@ -540,8 +471,6 @@ const Conquest = (() => {
     }
 
     if (path) {
-      // The route: a bold ribbon with a solid dark edge so it stays clear on snow, grass,
-      // sand and every territory colour, and an arrow on each tile showing the direction.
       const sides = [path.prevSide, path.nextSide].filter((x) => x >= 0);
       if (sides.length) {
         const d = sides.map((i) => `M60 52 L${SIDE_MID[i][0]} ${SIDE_MID[i][1]}`).join(' ');
@@ -565,7 +494,6 @@ const Conquest = (() => {
       }
     }
 
-    // ---- the tower (3D sprite, vector art if sprites.js is missing)
     if (tower) {
       const img = spriteImg(`tower_${tower.team}_${tower.level}`, TOWER_SPOT[0], TOWER_SPOT[1]);
       if (img) {
@@ -614,5 +542,4 @@ const Conquest = (() => {
   };
 })();
 
-// Lets the logic be tested in Node; harmless in the browser.
 if (typeof module !== 'undefined' && module.exports) module.exports = Conquest;
