@@ -407,7 +407,7 @@ const TILES = {
         src: './img/special/grass/Enchanted_Windmill.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 20,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -418,7 +418,7 @@ const TILES = {
         src: './img/special/grass/Boneyard.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 20,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -429,7 +429,7 @@ const TILES = {
         src: './img/special/grass/Mysterious_Shrine.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 45,
         points: 35,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -454,7 +454,7 @@ const TILES = {
         src: './img/special/sand/Dragon_Skull.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 26,
         points: 5,
         defense_modifier: 0.5,
         attack_modifier: 0.8
@@ -468,7 +468,7 @@ const TILES = {
         src: './img/special/halloween/Pal_Sematary.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 38,
         points: 2,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -479,7 +479,7 @@ const TILES = {
         src: './img/special/halloween/Haunted_Windmill.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 25,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -490,7 +490,7 @@ const TILES = {
         src: './img/special/halloween/Fields_of_Misery.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 45,
         points: 20,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -501,7 +501,7 @@ const TILES = {
         src: './img/special/winter/Manfred.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 20,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.00
@@ -515,7 +515,7 @@ const TILES = {
         src: './img/special/easter/Imposing_Structure.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 26,
         points: 5,
         defense_modifier: 0.10,
         attack_modifier: 0.9
@@ -526,7 +526,7 @@ const TILES = {
         src: './img/special/easter/Miracle_Shrine.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 36,
         points: 20,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -540,7 +540,7 @@ const TILES = {
         src: './img/special/winter/Wintery_Mill.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 10,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.00
@@ -551,7 +551,7 @@ const TILES = {
         src: './img/special/winter/Manfred.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 20,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.00
@@ -562,7 +562,7 @@ const TILES = {
         src: './img/special/winter/Frostbitten_Ruins.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 33,
         points: 10,
         defense_modifier: 0.9,
         attack_modifier: 1.10
@@ -573,7 +573,7 @@ const TILES = {
         src: './img/special/winter/Festive_Tree.png',
         buildable: false,
         passable: true,
-        cost: 22,
+        cost: 36,
         points: 35,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -639,12 +639,6 @@ const TILES = {
 
 };
 
-// Maps used to store each tile as "theme:position" (e.g. "halloween:2").
-// Maps are now stored by tile NAME ("halloween:Ghastly Mountain"), which
-// survives adding/removing/reordering tiles. This table is only used to
-// read OLD position-based saves/exports: it lists a theme's tiles in the
-// order they had at the time those saves were made. Themes not listed here
-// are read using their current order. You never need to edit this again.
 const LEGACY_TILE_ORDER = {
   halloween: [
     'Withered Meadow', 'Green Hills', 'Ghastly Mountain', 'Rocky Hills',
