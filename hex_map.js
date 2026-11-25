@@ -39,10 +39,7 @@ window.onload = () => {
     return activeTiles;
   };
 
-  // Every theme/palette (grass, sand, halloween, easter, winter, ...) is
-  // read straight from data.js rather than hardcoded, so new palettes
-  // just need an entry in TILES to show up here. Themes are NOT required
-  // to share tile counts or ordering with each other.
+
   const THEME_KEYS = Object.keys(TILES?.standard || {});
 
   const themeTilesCache = new Map();
@@ -51,18 +48,13 @@ window.onload = () => {
     return themeTilesCache.get(theme);
   };
 
-  // Each painted cell remembers which theme/palette AND which tile (by
-  // NAME) it was painted with, e.g. "halloween:Ghastly Mountain". Storing
-  // the name instead of a position means adding, removing or reordering
-  // tiles in data.js never changes what already-painted cells show.
+
   const encodeCell = (theme, idx) => {
     const name = tilesForTheme(theme)[idx]?.name;
     return `${theme}:${name !== undefined ? name : idx}`;
   };
 
-  // Old saves/exports stored a position ("halloween:2" or a bare number)
-  // instead of a name. Convert those using the tile order they were made
-  // with (LEGACY_TILE_ORDER in data.js) so they still load correctly.
+
   const legacyToName = (theme, n) => {
     const legacy = (typeof LEGACY_TILE_ORDER !== 'undefined' && LEGACY_TILE_ORDER[theme]) || null;
     if (legacy) return legacy[n];
@@ -89,10 +81,7 @@ window.onload = () => {
     return { theme, name: rest };
   };
 
-  // Resolves a stored cell value to a concrete { theme, idx, tiles, tile }
-  // regardless of which palette is currently active. If the theme no longer
-  // exists it falls back to the default ground tile; if only the tile was
-  // removed from data.js it falls back to that theme's first tile.
+
   const resolveCell = (raw) => {
     const data = decodeCell(raw);
     let theme = data ? data.theme : FIXED_THEME;
@@ -168,12 +157,11 @@ window.onload = () => {
   };
 
   
-  // Every map is generated at a fixed size and theme. There is no
-  // per-map width/height/theme control anymore.
+
   const FIXED_WIDTH = 'AS';
   const FIXED_HEIGHT = 46;
   const FIXED_THEME = 'grass';
-  const DEFAULT_TILE_INDEX = 0; // brand-new cells always start as the first palette tile
+  const DEFAULT_TILE_INDEX = 0; 
 
   const gridEl = document.getElementById('grid');
   const centerEl = document.getElementById('center');
@@ -209,20 +197,13 @@ window.onload = () => {
   const endWidth = fromAlpha(FIXED_WIDTH);
   const endHeight = FIXED_HEIGHT;
 
-  // "paletteTheme" is which palette (grass/sand/halloween/etc) the brush is
-  // currently painting from. It only decides what's offered in the Palette
-  // panel and what gets stamped onto newly-painted cells — it has no effect
-  // on the map's fixed base theme, and switching it never touches tiles
-  // already on the map (each of those remembers its own theme, see above).
+
   let paletteTheme = String(localStorage.getItem('paletteTheme') || '').trim();
   if (!THEME_KEYS.includes(paletteTheme)) paletteTheme = THEME_KEYS.includes(FIXED_THEME) ? FIXED_THEME : (THEME_KEYS[0] || FIXED_THEME);
 
   let activeTiles = tilesForTheme(paletteTheme);
 
-  // "selectedIndex" is the paint tool (which tile within the active
-  // palette the brush currently places), independent from
-  // DEFAULT_TILE_INDEX which is what a brand new, never-painted cell
-  // starts out as (always the map's fixed base theme).
+
   let selectedIndex = clampIndex(localStorage.getItem('selectedTile'), activeTiles.length);
 
   const legacyFill = localStorage.getItem('fillColor');
@@ -232,8 +213,7 @@ window.onload = () => {
     localStorage.removeItem('fillColor');
   }
 
-  // Clean up now-unused legacy keys from earlier versions of the app
-  // that had per-map width/height/theme controls.
+
   localStorage.removeItem('width');
   localStorage.removeItem('height');
   localStorage.removeItem('theme');
@@ -381,8 +361,7 @@ window.onload = () => {
     paletteThemeMenu.classList.toggle('open', next);
   };
 
-  // Switching the active palette only changes what's available to paint
-  // WITH from here on — it never touches tiles already placed on the map.
+
   const setPaletteTheme = (theme) => {
     if (!THEME_KEYS.includes(theme) || theme === paletteTheme) return;
 
@@ -599,9 +578,6 @@ window.onload = () => {
   };
 
   
-  // The map's size and base theme are fixed for every map, so exports
-  // mainly carry the tile layout (each cell already remembers its own
-  // theme+tile) plus which palette/tile the brush currently has selected.
   const buildExportPayload = () => {
     return {
       v: 1,
@@ -674,7 +650,7 @@ window.onload = () => {
     for (const k of Object.keys(gridColors)) delete gridColors[k];
     for (const k of Object.keys(obj.gridColors)) gridColors[k] = obj.gridColors[k];
 
-    // Towers travel with the map; older exports simply have none.
+
     pieces = sanitizePieces(obj.pieces || []);
     savePieces();
 
@@ -687,8 +663,7 @@ window.onload = () => {
     const grid = document.getElementById('grid');
     if (!grid) return;
 
-    // Skip hexes that are hidden on screen (the filler cells in the last row);
-    // otherwise they get drawn as an extra row of default tiles.
+
     const hexes = Array.from(grid.querySelectorAll('.hexagon')).filter(
       (hex) => hex.style.visibility !== 'hidden'
     );
@@ -697,7 +672,6 @@ window.onload = () => {
     
     const gridRect = grid.getBoundingClientRect();
 
-    // Size the canvas to the visible hexes only, not the whole grid box.
     let maxRight = 0;
     let maxBottom = 0;
     for (const hex of hexes) {
@@ -706,7 +680,7 @@ window.onload = () => {
       maxBottom = Math.max(maxBottom, r.bottom - gridRect.top);
     }
 
-    const padding = 70; // tall towers can rise above the first row
+    const padding = 70; 
     const canvas = document.createElement('canvas');
     canvas.width = Math.ceil(maxRight + padding * 2);
     canvas.height = Math.ceil(maxBottom + padding * 2);
@@ -780,7 +754,7 @@ window.onload = () => {
         if (img) {
           const iw = img.naturalWidth || w;
           const ih = img.naturalHeight || h;
-          const k = Math.min(w / iw, h / ih);          // CSS "contain"
+          const k = Math.min(w / iw, h / ih);          
           const dw = iw * k;
           const dh = ih * k;
           ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
@@ -793,7 +767,6 @@ window.onload = () => {
       drawHexFallback(x, y, w, h, tile?.color || '#444');
     }
 
-    // Territory first, then towers / labels above everything.
     const box = Conquest.OVERLAY_BOX;
     for (const layer of ['base', 'top']) {
       for (const hex of hexes) {
@@ -877,12 +850,6 @@ window.onload = () => {
     modal.classList.remove('open');
   };
 
-   // ==========================================================================
-  //  CONQUEST OVERLAY: towers, territory, strongholds, energy and
-  //  the path finder. Rules and artwork live in conquest.js; this part wires
-  //  them to the page. Towers are stored apart from the terrain, so they
-  //  never touch tiles.
-  // ==========================================================================
   const SH = Conquest.STRONGHOLD;
   const $ = (id) => document.getElementById(id);
 
@@ -917,7 +884,6 @@ window.onload = () => {
   const pathResultEl = $('path-result');
   const pathBannerEl = $('path-banner');
 
-  // Hexes that exist on screen (the even-column cells of the last row are hidden fillers).
   const isPlayableSpot = (col, row) => {
     if (col < 0 || col > endWidth) return false;
     if (row < 1 || row > endHeight) return false;
@@ -951,19 +917,18 @@ window.onload = () => {
   const saveViewPrefs = () => localStorage.setItem('hexView', JSON.stringify(viewPrefs));
 
   let activeTab = 'build';
-  let toolMode = 'terrain'; // terrain | tower | erase   (Build tab only)
+  let toolMode = 'terrain'; 
   let toolTeam = Conquest.TEAMS[localStorage.getItem('toolTeam')] ? localStorage.getItem('toolTeam') : 'red';
   let toolLevel = 1;
 
-  // What clicking a tile does depends on the tab you are on, so a click
-  // never builds something while you are looking at another tab.
+
   const activeMode = () => {
     if (activeTab === 'build') return toolMode;
     if (activeTab === 'energy') return 'path';
     return 'none';
   };
 
-  // Energy settings: which team you are, your techs (percent), tiles per move.
+
   let myTeam = Conquest.TEAMS[localStorage.getItem('myTeam')] ? localStorage.getItem('myTeam') : '';
   const clampPct = (v) => Math.min(100, Math.max(0, Number(v) || 0));
   const clampMove = (v) => Math.min(20, Math.max(1, Math.round(Number(v)) || Conquest.TILES_PER_MOVE));
@@ -971,7 +936,7 @@ window.onload = () => {
   const techs = { general: clampPct(savedTechs.general), alliance: clampPct(savedTechs.alliance), enemy: clampPct(savedTechs.enemy) };
   let perMove = clampMove(localStorage.getItem('hexPerMove') || Conquest.TILES_PER_MOVE);
 
-  let pathStart = ''; // a tile, or SH for "from my stronghold"
+  let pathStart = ''; 
   let pathEnd = '';
   let pathResult = null;
   let lastTerritory = new Map();
@@ -979,10 +944,8 @@ window.onload = () => {
   const newId = () => pieces.reduce((m, p) => Math.max(m, p.id), 0) + 1;
   const fmt = (n) => String(Math.round(n));
 
-  // ---- energy: costs, territory, path --------------------------------------
   const tileAt = (cell) => resolveCell(gridColors[cell]).tile;
 
-  // Energy to step onto a hex with the current team + techs, or null if impassable.
   const energyFor = (cell, territory) => {
     const tile = tileAt(cell);
     if (!tile || !tile.passable) return null;
@@ -1016,10 +979,8 @@ window.onload = () => {
     ? (pathResult.fromStronghold ? pathResult.cells.length : pathResult.cells.length - 1)
     : 0);
 
-  // ---- drawing -------------------------------------------------------------
-  let overlaySvgByCell = new Map(); // also used by the PNG export
+  let overlaySvgByCell = new Map(); 
 
-  // One overlay element per layer; created on demand, removed when empty.
   const setLayer = (hex, prop, cls, svg) => {
     let el = hex[prop];
 
@@ -1056,7 +1017,6 @@ window.onload = () => {
       byCell.get(p.cell).push(p);
     }
 
-    // A / B markers, the route, and the end of each move
     const pathInfo = new Map();
     if (pathResult && pathResult.ok) {
       for (const [k, v] of Conquest.pathInfoMap(pathResult.cells, { fromStronghold: pathResult.fromStronghold, perMove })) pathInfo.set(k, v);
@@ -1094,7 +1054,6 @@ window.onload = () => {
     }
   };
 
-  // Territory -> path -> map. Run whenever pieces, techs, team or terrain change.
   const refreshEnergy = () => {
     lastTerritory = Conquest.computeTerritory(pieces.filter((p) => p.type === 'tower'), isPlayableSpot);
     recomputePath(lastTerritory);
@@ -1104,7 +1063,6 @@ window.onload = () => {
   };
 
   let energyRaf = 0;
-  // Painting terrain changes costs, so refresh (at most once per frame) when it matters.
   const queueEnergyRefresh = () => {
     if (!viewPrefs.costs && !(pathStart && pathEnd)) return;
     if (energyRaf) return;
@@ -1114,7 +1072,6 @@ window.onload = () => {
     });
   };
 
-  // ---- tower rows (Towers tab) ----------------------------------------------
   const openGroups = new Set(readJSON('hexOpenGroups', ['towers:red', 'towers:yellow', 'towers:green', 'towers:blue']));
   const saveOpenGroups = () => localStorage.setItem('hexOpenGroups', JSON.stringify([...openGroups]));
 
@@ -1239,7 +1196,6 @@ window.onload = () => {
     return `<span class="team-swatch" style="background:${t.color}"></span><span>${t.label}</span><span class="team-corner">${t.cornerLabel}</span>`;
   };
 
-  // One collapsible drop-down per team, in map order.
   const renderGrouped = (container, list, kind, emptyText) => {
     const groups = [];
     for (const key of Conquest.CORNER_ORDER) {
@@ -1279,7 +1235,6 @@ window.onload = () => {
     renderGrouped(ovTowersEl, towers, 'towers', 'No towers');
   };
 
-  // ---- corner docks: each alliance's stronghold sits in its own corner -----
   const renderStrongholds = () => {
     if (!docksTopEl || !docksBottomEl) return;
 
@@ -1302,7 +1257,6 @@ window.onload = () => {
     docksBottomEl.replaceChildren(makeCard('blue'), makeCard('red'));
   };
 
-  // ---- energy panel: team, techs, path -------------------------------------
   const buildCompass = () => {
     if (!myTeamEl) return;
     myTeamEl.replaceChildren();
@@ -1405,7 +1359,6 @@ window.onload = () => {
     if (pathFromEl && document.activeElement !== pathFromEl) pathFromEl.value = pathStart;
     if (pathToEl && document.activeElement !== pathToEl) pathToEl.value = pathEnd;
 
-    // which box the next map click fills
     if (pathFromEl) pathFromEl.classList.toggle('picking', !pathStart || (!!pathStart && !!pathEnd));
     if (pathToEl) pathToEl.classList.toggle('picking', !!pathStart && !pathEnd);
     if (pathShBtn) pathShBtn.classList.toggle('active', pathStart === SH);
@@ -1413,7 +1366,6 @@ window.onload = () => {
     const tiles = pathTileCount();
     const moves = Math.ceil(tiles / perMove);
 
-    // floating summary above the map
     if (pathBannerEl) {
       if (pathResult && pathResult.ok) {
         pathBannerEl.hidden = false;
@@ -1443,7 +1395,6 @@ window.onload = () => {
     total.innerHTML = `<span class="big">${fmt(pathResult.total)}</span><span class="unit">energy</span><span class="moves">${tiles} tiles \u00b7 ${moves} move${moves === 1 ? '' : 's'}</span>`;
     pathResultEl.appendChild(total);
 
-    // tiles entered, in order, grouped into moves
     const entered = pathResult.cells
       .map((cell, i) => ({ cell, cost: pathResult.costs[i] }))
       .filter((s, i) => pathResult.fromStronghold || i > 0);
@@ -1514,7 +1465,6 @@ window.onload = () => {
   };
 
   const handlePathClick = (cell) => {
-    // first click = A, second = B, a third starts over
     if (!pathStart || (pathStart && pathEnd)) {
       pathStart = cell;
       pathEnd = '';
@@ -1540,7 +1490,6 @@ window.onload = () => {
   }
   $('path-clear')?.addEventListener('click', clearPath);
 
-  // ---- hover readout (tile, terrain, energy for the team you play) ---------
   let hoverCell = '';
   let hoverRaf = 0;
 
@@ -1583,7 +1532,6 @@ window.onload = () => {
     });
   }
 
-  // ---- everything that depends on pieces -----------------------------------
   const renderAll = () => {
     refreshEnergy();
     renderOverview();
@@ -1592,7 +1540,6 @@ window.onload = () => {
     savePieces();
   };
 
-  // ---- history (shares the Undo / Redo buttons with terrain painting) ------
   const commitPieces = (mutate) => {
     const before = clonePieces(pieces);
     mutate();
@@ -1618,7 +1565,6 @@ window.onload = () => {
     renderAll();
   };
 
-  // ---- placing pieces on the map -------------------------------------------
   const placeTowerAt = (cell) => {
     const note = Conquest.cleanNote(pieceNameEl ? pieceNameEl.value : '');
 
@@ -1639,13 +1585,12 @@ window.onload = () => {
   const erasePieceAt = (cell) => {
     const here = pieces.filter((p) => p.cell === cell);
     if (!here.length) return;
-    const victim = here[here.length - 1]; // the one added last
+    const victim = here[here.length - 1]; 
     commitPieces(() => { pieces = pieces.filter((p) => p.id !== victim.id); });
   };
 
   let lastClick = { key: '', t: 0 };
 
-  // Returns true when the click was consumed (anything but painting terrain).
   const handleMapClick = (cell) => {
     const mode = activeMode();
     if (mode === 'terrain') return false;
@@ -1674,12 +1619,10 @@ window.onload = () => {
     setTimeout(() => hex.classList.remove('locate'), 1700);
   }
 
-  // ---- messages (Towers tab) ------------------------------------------------
   function showOvMsg(text) {
     if (ovMsgEl) ovMsgEl.textContent = text || '';
   }
 
-  // ---- tools panel (Build tab) ---------------------------------------------
   const buildTeamPicker = () => {
     if (teamPickerEl) {
       teamPickerEl.replaceChildren();
@@ -1818,8 +1761,6 @@ window.onload = () => {
       const cellIndex = getCellFromEvent(e);
       if (!cellIndex) return;
 
-      // Tower tool, erase, path picking: act on the tile instead of painting.
-      // Touch is handled by the touchstart listener below.
       if (activeMode() !== 'terrain') {
         if (e.pointerType !== 'touch') handleMapClick(cellIndex);
         return;
@@ -1868,7 +1809,6 @@ window.onload = () => {
     gridEl.addEventListener('touchstart', (e) => {
       if (!e.touches || !e.touches.length) return;
 
-      // 2 fingers = let the browser handle pan/zoom
       if (e.touches.length >= 2) {
         touchPainting = false;
         lastCell = null;
@@ -1897,7 +1837,6 @@ window.onload = () => {
     }, { passive: false });
 
     gridEl.addEventListener('touchmove', (e) => {
-      // 2 fingers = stop painting and let browser pan/zoom
       if (e.touches && e.touches.length >= 2) {
         if (touchPainting) {
           touchPainting = false;
