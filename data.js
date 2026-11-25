@@ -1,3 +1,6 @@
+
+
+
 const TILE_PRESETS = {
   
   IMPASSABLE: {
@@ -17,6 +20,15 @@ const TILE_PRESETS = {
     points: 1,
     defense_modifier: 0.8, 
     attack_modifier: 1.0   
+  },
+
+  GEM_MINE: {
+    buildable: false,
+    passable: true,
+    cost: 22,
+    points: 1,
+    defense_modifier: 0.8,
+    attack_modifier: 1.0
   }
 };
 
@@ -55,6 +67,15 @@ function makeResource({ name, src }) {
     color: '#eeeeee',
     src,
     ...TILE_PRESETS.RESOURCE_COMMON
+  });
+}
+
+function makeGemMine({ src }) {
+  return makeTile({
+    name: 'Gem Mine',
+    color: '#e0245e',
+    src,
+    ...TILE_PRESETS.GEM_MINE
   });
 }
 
@@ -386,12 +407,6 @@ const TILES = {
         points: 1,
         defense_modifier: 1.0,
         attack_modifier: 1.0
-      }),
-      
-      makeImpassable({
-        name: 'Water',
-        color: '#6495ed',
-        src: './img/standard/winter/Water.png'
       })
     ]
   },
@@ -404,7 +419,7 @@ const TILES = {
         src: './img/special/grass/Enchanted_Windmill.png',
         buildable: false,
         passable: true,
-        cost: 20,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -415,7 +430,7 @@ const TILES = {
         src: './img/special/grass/Boneyard.png',
         buildable: false,
         passable: true,
-        cost: 20,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -426,7 +441,7 @@ const TILES = {
         src: './img/special/grass/Mysterious_Shrine.png',
         buildable: false,
         passable: true,
-        cost: 45,
+        cost: 22,
         points: 35,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -451,7 +466,7 @@ const TILES = {
         src: './img/special/sand/Dragon_Skull.png',
         buildable: false,
         passable: true,
-        cost: 26,
+        cost: 22,
         points: 5,
         defense_modifier: 0.5,
         attack_modifier: 0.8
@@ -465,7 +480,7 @@ const TILES = {
         src: './img/special/halloween/Pal_Sematary.png',
         buildable: false,
         passable: true,
-        cost: 38,
+        cost: 22,
         points: 2,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -476,7 +491,7 @@ const TILES = {
         src: './img/special/halloween/Haunted_Windmill.png',
         buildable: false,
         passable: true,
-        cost: 25,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.0
@@ -487,7 +502,7 @@ const TILES = {
         src: './img/special/halloween/Fields_of_Misery.png',
         buildable: false,
         passable: true,
-        cost: 45,
+        cost: 22,
         points: 20,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -498,7 +513,7 @@ const TILES = {
         src: './img/special/winter/Manfred.png',
         buildable: false,
         passable: true,
-        cost: 20,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.00
@@ -512,7 +527,7 @@ const TILES = {
         src: './img/special/easter/Imposing_Structure.png',
         buildable: false,
         passable: true,
-        cost: 26,
+        cost: 22,
         points: 5,
         defense_modifier: 0.10,
         attack_modifier: 0.9
@@ -523,7 +538,7 @@ const TILES = {
         src: './img/special/easter/Miracle_Shrine.png',
         buildable: false,
         passable: true,
-        cost: 36,
+        cost: 22,
         points: 20,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -537,7 +552,7 @@ const TILES = {
         src: './img/special/winter/Wintery_Mill.png',
         buildable: false,
         passable: true,
-        cost: 10,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.00
@@ -548,7 +563,7 @@ const TILES = {
         src: './img/special/winter/Manfred.png',
         buildable: false,
         passable: true,
-        cost: 20,
+        cost: 22,
         points: 5,
         defense_modifier: 0.8,
         attack_modifier: 1.00
@@ -559,7 +574,7 @@ const TILES = {
         src: './img/special/winter/Frostbitten_Ruins.png',
         buildable: false,
         passable: true,
-        cost: 33,
+        cost: 22,
         points: 10,
         defense_modifier: 0.9,
         attack_modifier: 1.10
@@ -570,7 +585,7 @@ const TILES = {
         src: './img/special/winter/Festive_Tree.png',
         buildable: false,
         passable: true,
-        cost: 36,
+        cost: 22,
         points: 35,
         defense_modifier: 1.3,
         attack_modifier: 0.7
@@ -588,27 +603,32 @@ const TILES = {
     grass: [
       makeResource({ name: 'Mine', src: './img/resource/grass/Mine.png' }),
       makeResource({ name: 'Library', src: './img/resource/grass/Library.png' }),
-      makeResource({ name: 'Remote Village', src: './img/resource/grass/Village.png' })
+      makeResource({ name: 'Remote Village', src: './img/resource/grass/Village.png' }),
+      makeGemMine({ src: './img/resource/grass/Gem_Mine.png' })
     ],
     sand: [
       makeResource({ name: 'Mine', src: './img/resource/sand/Mine.png' }),
       makeResource({ name: 'Library', src: './img/resource/sand/Library.png' }),
-      makeResource({ name: 'Remote Village', src: './img/resource/sand/Village.png' })
+      makeResource({ name: 'Remote Village', src: './img/resource/sand/Village.png' }),
+      makeGemMine({ src: './img/resource/sand/Gem_Mine.png' })
     ],
     halloween: [
       makeResource({ name: 'Mine', src: './img/resource/halloween/Mine.png' }),
       makeResource({ name: 'Library', src: './img/resource/halloween/Library.png' }),
-      makeResource({ name: 'Remote Village', src: './img/resource/halloween/Village.png' })
+      makeResource({ name: 'Remote Village', src: './img/resource/halloween/Village.png' }),
+      makeGemMine({ src: './img/resource/halloween/Gem_Mine.png' })
     ],
     easter: [
       makeResource({ name: 'Egg Mine', src: './img/resource/easter/Egg_Mine.png' }),
       makeResource({ name: 'Giant Hare', src: './img/resource/easter/Giant_Hare.png' }),
-      makeResource({ name: 'Eggsercise Yard', src: './img/resource/easter/Eggsercise_Yard.png' })
+      makeResource({ name: 'Eggsercise Yard', src: './img/resource/easter/Eggsercise_Yard.png' }),
+      makeGemMine({ src: './img/resource/easter/Gem_Mine.png' })
     ],
     winter: [
       makeResource({ name: 'Mine', src: './img/resource/winter/Mine.png' }),
       makeResource({ name: 'Library', src: './img/resource/winter/Library.png' }),
-      makeResource({ name: 'Remote Village', src: './img/resource/winter/Village.png' })
+      makeResource({ name: 'Remote Village', src: './img/resource/winter/Village.png' }),
+      makeGemMine({ src: './img/resource/winter/Gem_Mine.png' })
     ]
   },
 
