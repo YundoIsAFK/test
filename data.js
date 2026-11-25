@@ -1,6 +1,3 @@
-
-
-
 const TILE_PRESETS = {
   
   IMPASSABLE: {
