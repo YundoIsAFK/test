@@ -1,13 +1,3 @@
-'use strict';
-
-/*
- * Conquest overlay for the map maker: watchtowers,
- * team territory and the alliance stronghold.
- *
- * This file has no DOM code. It holds the rules (teams, radius per tower
- * level, hex geometry) and the SVG artwork, and exposes them as `Conquest`.
- * hex_map.js does the wiring (clicks, overview panel, saving).
- */
 const Conquest = (() => {
   const TOWER_RADIUS = [0, 1, 2, 3, 4];
   const TILES_PER_MOVE = 4;
