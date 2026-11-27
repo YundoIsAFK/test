@@ -39,7 +39,6 @@ window.onload = () => {
     return activeTiles;
   };
 
-
   const THEME_KEYS = Object.keys(TILES?.standard || {});
 
   const themeTilesCache = new Map();
@@ -48,12 +47,10 @@ window.onload = () => {
     return themeTilesCache.get(theme);
   };
 
-
   const encodeCell = (theme, idx) => {
     const name = tilesForTheme(theme)[idx]?.name;
     return `${theme}:${name !== undefined ? name : idx}`;
   };
-
 
   const legacyToName = (theme, n) => {
     const legacy = (typeof LEGACY_TILE_ORDER !== 'undefined' && LEGACY_TILE_ORDER[theme]) || null;
@@ -80,7 +77,6 @@ window.onload = () => {
     }
     return { theme, name: rest };
   };
-
 
   const resolveCell = (raw) => {
     const data = decodeCell(raw);
@@ -156,7 +152,6 @@ window.onload = () => {
     return new TextDecoder().decode(bytes);
   };
 
-  
 
   const FIXED_WIDTH = 'AS';
   const FIXED_HEIGHT = 46;
@@ -197,12 +192,10 @@ window.onload = () => {
   const endWidth = fromAlpha(FIXED_WIDTH);
   const endHeight = FIXED_HEIGHT;
 
-
   let paletteTheme = String(localStorage.getItem('paletteTheme') || '').trim();
   if (!THEME_KEYS.includes(paletteTheme)) paletteTheme = THEME_KEYS.includes(FIXED_THEME) ? FIXED_THEME : (THEME_KEYS[0] || FIXED_THEME);
 
   let activeTiles = tilesForTheme(paletteTheme);
-
 
   let selectedIndex = clampIndex(localStorage.getItem('selectedTile'), activeTiles.length);
 
@@ -212,8 +205,6 @@ window.onload = () => {
     localStorage.setItem('selectedTile', String(selectedIndex));
     localStorage.removeItem('fillColor');
   }
-
-
   localStorage.removeItem('width');
   localStorage.removeItem('height');
   localStorage.removeItem('theme');
@@ -361,7 +352,6 @@ window.onload = () => {
     paletteThemeMenu.classList.toggle('open', next);
   };
 
-
   const setPaletteTheme = (theme) => {
     if (!THEME_KEYS.includes(theme) || theme === paletteTheme) return;
 
@@ -495,9 +485,16 @@ window.onload = () => {
 
   const applyPaintToCell = (cellIndex) => {
     const mirrors = getMirrors(cellIndex);
+    let blockedByTower = false;
 
     mirrors.forEach((cell) => {
       if (!isValidCell(cell)) return;
+
+      const wanted = activeTiles[clampIndex(selectedIndex, activeTiles.length)];
+      if (wanted && !wanted.buildable && towerAt(cell)) {
+        blockedByTower = true;
+        return;
+      }
 
       const beforeRaw = gridColors[cell];
       const before = resolveCell(beforeRaw);
@@ -525,6 +522,7 @@ window.onload = () => {
     localStorage.setItem('hexMap', JSON.stringify(gridColors));
     updateStatsUI();
     queueEnergyRefresh();
+    if (blockedByTower) showToast('A tower is on that tile');
   };
 
   const pushHistory = (beforeMap, afterMap) => {
@@ -577,7 +575,7 @@ window.onload = () => {
     updateUndoRedoUI();
   };
 
-  
+
   const buildExportPayload = () => {
     return {
       v: 1,
@@ -650,7 +648,6 @@ window.onload = () => {
     for (const k of Object.keys(gridColors)) delete gridColors[k];
     for (const k of Object.keys(obj.gridColors)) gridColors[k] = obj.gridColors[k];
 
-
     pieces = sanitizePieces(obj.pieces || []);
     savePieces();
 
@@ -662,7 +659,6 @@ window.onload = () => {
   try {
     const grid = document.getElementById('grid');
     if (!grid) return;
-
 
     const hexes = Array.from(grid.querySelectorAll('.hexagon')).filter(
       (hex) => hex.style.visibility !== 'hidden'
@@ -754,7 +750,7 @@ window.onload = () => {
         if (img) {
           const iw = img.naturalWidth || w;
           const ih = img.naturalHeight || h;
-          const k = Math.min(w / iw, h / ih);          
+          const k = Math.min(w / iw, h / ih);         
           const dw = iw * k;
           const dh = ih * k;
           ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
@@ -873,6 +869,8 @@ window.onload = () => {
   const docksBottomEl = $('strongholds-bottom');
   const meBadgeEl = $('me-badge');
   const hoverEl = $('hover-info');
+  const toastEl = $('toast');
+  const paletteWrapEl = $('palette-panel');
 
   const myTeamEl = $('my-team');
   const techEls = { general: $('tech-general'), alliance: $('tech-alliance'), enemy: $('tech-enemy') };
@@ -921,13 +919,11 @@ window.onload = () => {
   let toolTeam = Conquest.TEAMS[localStorage.getItem('toolTeam')] ? localStorage.getItem('toolTeam') : 'red';
   let toolLevel = 1;
 
-
   const activeMode = () => {
     if (activeTab === 'build') return toolMode;
     if (activeTab === 'energy') return 'path';
     return 'none';
   };
-
 
   let myTeam = Conquest.TEAMS[localStorage.getItem('myTeam')] ? localStorage.getItem('myTeam') : '';
   const clampPct = (v) => Math.min(100, Math.max(0, Number(v) || 0));
@@ -945,6 +941,22 @@ window.onload = () => {
   const fmt = (n) => String(Math.round(n));
 
   const tileAt = (cell) => resolveCell(gridColors[cell]).tile;
+
+  const canBuildAt = (cell) => {
+    const t = tileAt(cell);
+    return !!t && !!t.buildable;
+  };
+
+  const towerAt = (cell) => pieces.find((p) => p.type === 'tower' && p.cell === cell);
+
+  let toastTimer = 0;
+  function showToast(text) {
+    if (!toastEl) return;
+    toastEl.textContent = text;
+    toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.hidden = true; }, 2200);
+  }
 
   const energyFor = (cell, territory) => {
     const tile = tileAt(cell);
@@ -1135,12 +1147,17 @@ window.onload = () => {
     pos.value = piece.cell;
     pos.maxLength = 8;
     pos.title = 'Position';
+    if (!canBuildAt(piece.cell)) {
+      pos.classList.add('bad');
+      pos.title = `Not buildable: ${tileAt(piece.cell) ? tileAt(piece.cell).name : ''}`;
+    }
     pos.addEventListener('change', () => {
       const next = Conquest.normalizePosition(pos.value);
       let problem = '';
 
       if (!next || next === SH) problem = 'Type a position like D32.';
       else if (!isPlayableCell(next)) problem = `${next} is not on the map.`;
+      else if (!canBuildAt(next)) problem = `Can\u2019t build on ${tileAt(next).name}.`;
       else if (pieces.some((p) => p.type === 'tower' && p.cell === next && p.id !== piece.id)) problem = `${next} already has a tower.`;
 
       if (problem) {
@@ -1509,8 +1526,10 @@ window.onload = () => {
     const owner = lastTerritory.get(hoverCell) ? lastTerritory.get(hoverCell).team : null;
     const eff = energyFor(hoverCell, lastTerritory);
     const dot = owner ? `<i style="background:${Conquest.TEAMS[owner].color}"></i>` : '';
-    hoverEl.innerHTML = `<b>${hoverCell}</b><span>${tile.name}</span>${dot}<em>${eff === null ? 'impassable' : fmt(eff) + ' energy'}</em>`;
+    const noBuild = activeMode() === 'tower' && !tile.buildable;
+    hoverEl.innerHTML = `<b>${hoverCell}</b><span>${tile.name}</span>${dot}<em>${eff === null ? 'impassable' : fmt(eff) + ' energy'}</em>${noBuild ? '<strong class="warn">Can\u2019t build</strong>' : ''}`;
     hoverEl.hidden = false;
+    if (gridEl) gridEl.classList.toggle('mode-blocked', noBuild);
   }
 
   if (gridEl) {
@@ -1566,6 +1585,12 @@ window.onload = () => {
   };
 
   const placeTowerAt = (cell) => {
+    const tile = tileAt(cell);
+    if (!tile || !tile.buildable) {
+      showToast(`Can\u2019t build on ${tile ? tile.name : 'this tile'}`);
+      return;
+    }
+
     const note = Conquest.cleanNote(pieceNameEl ? pieceNameEl.value : '');
 
     commitPieces(() => {
@@ -1658,6 +1683,7 @@ window.onload = () => {
     }
 
     const piece = toolMode === 'tower';
+    if (paletteWrapEl) paletteWrapEl.hidden = toolMode !== 'terrain';
     if (toolOptionsEl) toolOptionsEl.hidden = !piece;
     if (levelWrapEl) levelWrapEl.hidden = toolMode !== 'tower';
     if (nameWrapEl) nameWrapEl.hidden = !piece;
